@@ -40,7 +40,7 @@ que cambia en esta fase es que ahora está repartido en páginas reales.
   desde el navegador, igual que antes. Cuando lo decidamos, esto pasa a
   Netlify Scheduled Functions + Netlify DB, y las páginas dejan de llamar
   a Yahoo/CFTC/NASS directamente.
-- **Clave de NASS**: en tu HTML original viajaba en el cliente. Aquí no
+- **Clave de NASS**: ya resuelta. `/nass-api` no va directo a NASS: pasa por `netlify/functions/nass.mjs`, que anade la clave en el servidor leyendola de la variable de entorno `NASS_API_KEY` (Netlify > Site configuration > Environment variables > Add a variable). La clave no esta en el repositorio ni viaja al navegador. Si esa variable no esta definida, la funcion responde con un mensaje explicito en vez de un 401 opaco.
   se manda ninguna clave (por eso el informe puede fallar si NASS la
   exige) — se resuelve de raíz en la Fase 2, cuando la llamada se mueva
   al servidor.
