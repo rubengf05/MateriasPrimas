@@ -132,16 +132,20 @@ export async function fetchCot(filterLike, notLikes) {
 /* ---------- USDA NASS QuickStats ---------- */
 
 export async function nassFetch(params) {
-  // NOTA IMPORTANTE: en tu HTML original la clave de NASS se mandaba desde
-  // el cliente (NASS_API_KEY visible en el código fuente). Aquí, de forma
-  // deliberada, NO se manda ninguna clave desde el navegador: en la Fase 2
-  // esto se resuelve con una Netlify Function que añade la clave en el
-  // servidor. De momento esta llamada funcionará solo si /nass-api no exige
-  // key (o mientras se decide dónde inyectarla).
-  const usp = new URLSearchParams({ format: 'JSON', ...params });
+  // La clave de NASS ya no viaja nunca desde el navegador: /nass-api apunta
+  // ahora a netlify/functions/nass.mjs (ver netlify.toml), que la anade en el
+  // servidor leyendola de la variable de entorno NASS_API_KEY. Antes este
+  // endpoint iba directo a NASS sin clave y por eso el deploy devolvia 401.
+  const safeParams = { ...(params || {}) };
+  delete safeParams.key; // por si acaso: la clave se inyecta solo en servidor
+
+  const usp = new URLSearchParams({ format: 'JSON', ...safeParams });
   const r = await fetch('/nass-api?' + usp.toString());
   if (!r.ok) {
     if (r.status === 400) throw dataError('BAD_QUERY', 'NASS 400');
+    if (r.status === 401 || r.status === 403) {
+      throw dataError('AUTH', 'NASS ' + r.status + ': la clave del servidor falta o no es valida (revisa NASS_API_KEY en Netlify)');
+    }
     if (r.status === 429) throw dataError('RATE_LIMIT', 'NASS 429');
     throw dataError('UPSTREAM', 'NASS HTTP ' + r.status);
   }
