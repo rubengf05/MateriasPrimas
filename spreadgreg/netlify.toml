@@ -1,0 +1,50 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# ---- Proxy USDA AMS (Oculta la API key y evita CORS) ----
+[[redirects]]
+  from = "/ams-api/*"
+  to = "https://oK/SXE39wQhwvn2TKtr3KG4kzecvwRa4:@marsapi.ams.usda.gov/services/v1.2/:splat"
+  status = 200
+  force = true
+
+# ---- Proxy USDA NASS QuickStats (evita el bloqueo CORS) ----
+[[redirects]]
+  from = "/nass-api"
+  to = "https://quickstats.nass.usda.gov/api/api_GET/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/nass-api/*"
+  to = "https://quickstats.nass.usda.gov/api/api_GET/:splat"
+  status = 200
+  force = true
+
+# ---- Proxy Yahoo Finance ----
+[[redirects]]
+  from = "/yahoo/*"
+  to = "https://query1.finance.yahoo.com/:splat"
+  status = 200
+  force = true
+
+# Fallback de Yahoo por si query1 limita las peticiones
+[[redirects]]
+  from = "/yahoo2/*"
+  to = "https://query2.finance.yahoo.com/:splat"
+  status = 200
+  force = true
+
+# ---- Proxy CFTC (COT) ----
+[[redirects]]
+  from = "/api/cftc"
+  to = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
+  status = 200
+  force = true
+
+# IMPORTANTE: estos redirects deben ir SIEMPRE antes del catch-all de Next.js
+# (@netlify/plugin-nextjs lo añade automáticamente al final del build)
