@@ -5,6 +5,10 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # ---- Proxy USDA AMS (Oculta la API key y evita CORS) ----
 [[redirects]]
   from = "/ams-api/*"
@@ -12,16 +16,21 @@
   status = 200
   force = true
 
-# ---- Proxy USDA NASS QuickStats (evita el bloqueo CORS) ----
+# ---- USDA NASS QuickStats -> Netlify Function ----
+# NASS exige el parametro "key" y devuelve 401 si no llega. Un redirect no
+# puede inyectar secretos, asi que /nass-api pasa por netlify/functions/nass.mjs,
+# que anade la clave desde la variable de entorno NASS_API_KEY (Netlify >
+# Site configuration > Environment variables). La clave nunca va en el repo
+# ni llega al navegador.
 [[redirects]]
   from = "/nass-api"
-  to = "https://quickstats.nass.usda.gov/api/api_GET/"
+  to = "/.netlify/functions/nass"
   status = 200
   force = true
 
 [[redirects]]
   from = "/nass-api/*"
-  to = "https://quickstats.nass.usda.gov/api/api_GET/:splat"
+  to = "/.netlify/functions/nass"
   status = 200
   force = true
 
