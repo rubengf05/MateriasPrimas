@@ -9,7 +9,6 @@ export default function FuturesCurve({ cfg, onMarketData }) {
 
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       const { contractsByRoot, priceCache } = await loadMarketData(cfg);
       if (cancelled) return;
@@ -22,12 +21,7 @@ export default function FuturesCurve({ cfg, onMarketData }) {
         });
       });
       const times = [...pointMap.keys()].sort((a, b) => a - b);
-
       if (!times.length) { setStatus('empty'); return; }
-      setStatus('ok');
-
-      const { Chart } = await import('chart.js/auto');
-      if (chartRef.current) chartRef.current.destroy();
 
       const labels = times.map(tm => pointMap.get(tm));
       const datasets = cfg.tickers.map(t => {
@@ -45,11 +39,18 @@ export default function FuturesCurve({ cfg, onMarketData }) {
         };
       });
 
+      const { Chart } = await import('chart.js/auto');
+      if (cancelled) return;
+      if (chartRef.current) chartRef.current.destroy();
+
+      // El canvas SIEMPRE está montado y con tamaño ya asentado por CSS,
+      // así que Chart.js lo mide correctamente desde el primer instante.
       chartRef.current = new Chart(canvasRef.current.getContext('2d'), {
         type: 'line',
         data: { labels, datasets },
         options: {
-          responsive: true, maintainAspectRatio: false,
+          responsive: true,
+          maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { display: datasets.length > 1 },
@@ -58,6 +59,12 @@ export default function FuturesCurve({ cfg, onMarketData }) {
           scales: { x: { grid: { display: false } } }
         }
       });
+
+      // Actualizamos el estado DESPUÉS de crear el chart, y forzamos
+      // un resize en el siguiente frame para que recalcule con el
+      // layout ya definitivo (evita el bug de ejes descolocados).
+      setStatus('ok');
+      requestAnimationFrame(() => chartRef.current?.resize());
     })();
 
     return () => { cancelled = true; chartRef.current?.destroy(); };
@@ -68,9 +75,13 @@ export default function FuturesCurve({ cfg, onMarketData }) {
   }
 
   return (
-    <div className="sg-chart-wrap">
+    <div className="sg-chart-wrap" style={{ position: 'relative', height: 400 }}>
       {status === 'empty' && <div className="sg-empty">Sin datos para esta curva ahora mismo.</div>}
-      <canvas ref={canvasRef} style={{ display: status === 'ok' ? 'block' : 'none' }} />
+      {/* El canvas se mantiene siempre montado; solo se atenúa mientras carga */}
+      <canvas
+        ref={canvasRef}
+        style={{ opacity: status === 'ok' ? 1 : 0, transition: 'opacity 0.15s' }}
+      />
     </div>
   );
 }
