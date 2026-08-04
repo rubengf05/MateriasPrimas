@@ -75,7 +75,7 @@ export default function FuturesCurve({ cfg, onMarketData }) {
   }
 
   return (
-    <div className="sg-chart-wrap" style={{ position: 'relative', height: 325 }}>
+    <div className="sg-chart-wrap" style={{ position: 'relative', height: 275 }}>
       {status === 'empty' && <div className="sg-empty">Sin datos para esta curva ahora mismo.</div>}
       {/* El canvas se mantiene siempre montado; solo se atenúa mientras carga */}
       <canvas
