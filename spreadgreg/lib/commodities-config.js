@@ -182,16 +182,204 @@ export const COMMODITIES_CONFIG = [
     extraContinuous: ['GF', 'ZC', 'ZM', 'HE'],
     cot: [{ key: 'le', label: 'Live Cattle (CME)', filterLike: '%LIVE CATTLE%' }],
     usda: [
-      { id: 'cof-inventory', label: 'Cattle on Feed — Inventory',
-        shortDesc: ['CATTLE, ON FEED - INVENTORY'], params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cattle-inventory', label: 'Cattle Inventory — All Cattle & Calves',
-        shortDesc: ['CATTLE, INCL CALVES - INVENTORY'], params: { year__GE: THIS_YEAR - 2 } },
-      { id: 'beef-cows', label: 'Cattle Inventory — Beef Cows',
-        shortDesc: ['CATTLE, COWS, BEEF - INVENTORY'], params: { year__GE: THIS_YEAR - 2 } },
-      { id: 'cold-storage-beef', label: 'Cold Storage — Beef',
-        paramSets: [{ commodity_desc: 'BEEF', statisticcat_desc: 'STOCKS',
-                      util_practice_desc: 'COLD STORAGE, FROZEN', class_desc: 'ALL CLASSES' }],
-        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 }
+      {
+        id: 'cattle-inventory',
+        label: 'Cattle Inventory (Jan & Jul)',
+        description: 'Semiannual inventory by class. January release includes state-level detail and prior-year calf crop; July release is U.S. total only and projects current-year calf crop.',
+        groups: [
+          {
+            name: 'Total & cows',
+            items: [
+              { id: 'ci-all-cattle-calves', label: 'All cattle and calves',
+                shortDesc: 'CATTLE, INCL CALVES - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'INCL CALVES',
+                              statisticcat_desc: 'INVENTORY' }] },
+              { id: 'ci-cows-all', label: 'All cows and heifers that have calved',
+                shortDesc: 'CATTLE, COWS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'COWS',
+                              statisticcat_desc: 'INVENTORY' }],
+                subItems: [
+                  { id: 'ci-cows-beef', label: 'Beef cows',
+                    shortDesc: 'CATTLE, COWS, BEEF - INVENTORY',
+                    paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'COWS, BEEF',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'ci-cows-milk', label: 'Milk cows',
+                    shortDesc: 'CATTLE, COWS, MILK - INVENTORY',
+                    paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'COWS, MILK',
+                                  statisticcat_desc: 'INVENTORY' }] }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Heifers 500 lbs and over',
+            items: [
+              { id: 'ci-heifers-500', label: 'All heifers 500 pounds and over',
+                shortDesc: 'CATTLE, HEIFERS, GE 500 LBS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'HEIFERS, GE 500 LBS',
+                              statisticcat_desc: 'INVENTORY' }],
+                subItems: [
+                  { id: 'ci-heifers-500-beef-repl',
+                    label: 'For beef cow replacement',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, BEEF REPLACEMENT - INVENTORY',
+                    paramSets: [{ commodity_desc: 'CATTLE',
+                                  class_desc: 'HEIFERS, GE 500 LBS, BEEF REPLACEMENT',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'ci-heifers-500-milk-repl',
+                    label: 'For milk cow replacement',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, MILK REPLACEMENT - INVENTORY',
+                    paramSets: [{ commodity_desc: 'CATTLE',
+                                  class_desc: 'HEIFERS, GE 500 LBS, MILK REPLACEMENT',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'ci-heifers-500-other',
+                    label: 'Other heifers',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, OTHER - INVENTORY',
+                    paramSets: [{ commodity_desc: 'CATTLE',
+                                  class_desc: 'HEIFERS, GE 500 LBS, OTHER',
+                                  statisticcat_desc: 'INVENTORY' }] }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Steers, bulls & calves',
+            items: [
+              { id: 'ci-steers-500', label: 'Steers 500 pounds and over',
+                shortDesc: 'CATTLE, STEERS, GE 500 LBS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'STEERS, GE 500 LBS',
+                              statisticcat_desc: 'INVENTORY' }] },
+              { id: 'ci-bulls-500', label: 'Bulls 500 pounds and over',
+                shortDesc: 'CATTLE, BULLS, GE 500 LBS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'BULLS, GE 500 LBS',
+                              statisticcat_desc: 'INVENTORY' }] },
+              { id: 'ci-calves-lt500', label: 'Calves under 500 pounds',
+                shortDesc: 'CATTLE, CALVES, LT 500 LBS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'CALVES, LT 500 LBS',
+                              statisticcat_desc: 'INVENTORY' }] }
+            ]
+          },
+          {
+            name: 'On feed (semiannual snapshot)',
+            items: [
+              { id: 'ci-on-feed-all', label: 'All cattle on feed (all feedlots)',
+                shortDesc: 'CATTLE, ON FEED - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'INVENTORY', class_desc: 'ALL CLASSES' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 2 }
+      },
+      {
+        id: 'calf-crop',
+        label: 'Calf Crop',
+        description: 'Number of calves born during the calendar year. Final prior-year total published with January Cattle report; current-year projection published with July Cattle report.',
+        groups: [
+          {
+            name: 'Annual',
+            items: [
+              { id: 'calf-crop-total', label: 'Calf crop — total',
+                shortDesc: ['CATTLE, INCL CALVES - PRODUCTION, MEASURED IN HEAD',
+                            'CATTLE - PRODUCTION, MEASURED IN HEAD'],
+                paramSets: [{ commodity_desc: 'CATTLE', statisticcat_desc: 'PRODUCTION',
+                              unit_desc: 'HEAD' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 3 }
+      },
+      {
+        id: 'cof-monthly',
+        label: 'Cattle on Feed — Monthly',
+        description: 'Monthly report covering feedlots with 1,000+ head capacity. Inventory as of the 1st of the month; placements, marketings and other disappearance during the prior month.',
+        groups: [
+          {
+            name: 'Inventory',
+            items: [
+              { id: 'cof-inventory', label: 'Cattle on Feed — Inventory',
+                shortDesc: 'CATTLE, ON FEED - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'INVENTORY', class_desc: 'ALL CLASSES' }] }
+            ]
+          },
+          {
+            name: 'Placements',
+            items: [
+              { id: 'cof-placements-total', label: 'Placements — total',
+                shortDesc: 'CATTLE, ON FEED - PLACEMENTS, MEASURED IN HEAD',
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'PLACEMENTS', class_desc: 'ALL CLASSES' }],
+                subItems: [
+                  { id: 'cof-placements-lt600', label: 'Placements — under 600 lbs',
+                    shortDesc: 'CATTLE, ON FEED, LT 600 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, LT 600 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-600-699', label: 'Placements — 600 to 699 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 600-699 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 600-699 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-700-799', label: 'Placements — 700 to 799 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 700-799 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 700-799 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-800-899', label: 'Placements — 800 to 899 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 800-899 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 800-899 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-900-999', label: 'Placements — 900 to 999 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 900-999 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 900-999 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-ge1000', label: 'Placements — 1,000 lbs and over',
+                    shortDesc: 'CATTLE, ON FEED, GE 1,000 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, GE 1,000 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Outflow',
+            items: [
+              { id: 'cof-marketings', label: 'Marketings (Sales for Slaughter)',
+                shortDesc: ['CATTLE, ON FEED - SALES, MEASURED IN HEAD',
+                            'CATTLE, ON FEED - SALES FOR SLAUGHTER, MEASURED IN HEAD'],
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'SALES FOR SLAUGHTER',
+                              class_desc: 'ALL CLASSES' }] },
+              { id: 'cof-other-disappearance', label: 'Other Disappearance',
+                shortDesc: 'CATTLE, ON FEED - DISAPPEARANCE, OTHER, MEASURED IN HEAD',
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'DISAPPEARANCE',
+                              class_desc: 'ALL CLASSES' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 1 }, maxRows: 24
+      },
+      {
+        id: 'cold-storage-beef',
+        label: 'Cold Storage — Beef',
+        description: 'Monthly stocks of beef in commercial cold storage warehouses.',
+        groups: [
+          {
+            name: 'Frozen stocks',
+            items: [
+              { id: 'cs-beef-total', label: 'Beef — total frozen',
+                paramSets: [{ commodity_desc: 'BEEF', statisticcat_desc: 'STOCKS',
+                              util_practice_desc: 'COLD STORAGE, FROZEN',
+                              class_desc: 'ALL CLASSES' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 1 }, maxRows: 12
+      }
     ],
     spreads: [
       { id: 'leg-lej', label: 'LEG–LEJ · Feb vs Abr', unit: '$/cwt', op: 'subtract',
@@ -214,19 +402,122 @@ export const COMMODITIES_CONFIG = [
     extraContinuous: ['LE', 'ZC'],
     cot: [{ key: 'gf', label: 'Feeder Cattle (CME)', filterLike: '%FEEDER CATTLE%' }],
     usda: [
-      { id: 'cof-inventory', label: 'Cattle on Feed — Inventory',
-        shortDesc: ['CATTLE, ON FEED - INVENTORY'], params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cof-placements', label: 'Cattle on Feed — Placements',
-        shortDesc: ['CATTLE, ON FEED - PLACEMENTS, MEASURED IN HEAD'],
-        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cof-marketings', label: 'Cattle on Feed — Marketings',
-        shortDesc: ['CATTLE, ON FEED - SALES, MEASURED IN HEAD',
-                    'CATTLE, ON FEED - SALES FOR SLAUGHTER, MEASURED IN HEAD'],
-        paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
-                      statisticcat_desc: 'SALES FOR SLAUGHTER', class_desc: 'ALL CLASSES' }],
-        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cattle-inventory', label: 'Cattle Inventory — All Cattle & Calves',
-        shortDesc: ['CATTLE, INCL CALVES - INVENTORY'], params: { year__GE: THIS_YEAR - 2 } }
+      {
+        id: 'cattle-inventory',
+        label: 'Cattle Inventory (Jan & Jul)',
+        description: 'Semiannual inventory by class. Feeder cattle supply outside feedlots is derived from calves under 500 lbs plus other heifers and steers 500+ lbs not on feed.',
+        groups: [
+          {
+            name: 'Total & cows',
+            items: [
+              { id: 'ci-all-cattle-calves', label: 'All cattle and calves',
+                shortDesc: 'CATTLE, INCL CALVES - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'INCL CALVES',
+                              statisticcat_desc: 'INVENTORY' }] },
+              { id: 'ci-cows-all', label: 'All cows and heifers that have calved',
+                shortDesc: 'CATTLE, COWS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'COWS',
+                              statisticcat_desc: 'INVENTORY' }],
+                subItems: [
+                  { id: 'ci-cows-beef', label: 'Beef cows',
+                    shortDesc: 'CATTLE, COWS, BEEF - INVENTORY' },
+                  { id: 'ci-cows-milk', label: 'Milk cows',
+                    shortDesc: 'CATTLE, COWS, MILK - INVENTORY' }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Feeder supply components',
+            items: [
+              { id: 'ci-heifers-500', label: 'All heifers 500 pounds and over',
+                shortDesc: 'CATTLE, HEIFERS, GE 500 LBS - INVENTORY',
+                paramSets: [{ commodity_desc: 'CATTLE', class_desc: 'HEIFERS, GE 500 LBS',
+                              statisticcat_desc: 'INVENTORY' }],
+                subItems: [
+                  { id: 'ci-heifers-500-beef-repl', label: 'For beef cow replacement',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, BEEF REPLACEMENT - INVENTORY' },
+                  { id: 'ci-heifers-500-milk-repl', label: 'For milk cow replacement',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, MILK REPLACEMENT - INVENTORY' },
+                  { id: 'ci-heifers-500-other', label: 'Other heifers',
+                    shortDesc: 'CATTLE, HEIFERS, GE 500 LBS, OTHER - INVENTORY' }
+                ]
+              },
+              { id: 'ci-steers-500', label: 'Steers 500 pounds and over',
+                shortDesc: 'CATTLE, STEERS, GE 500 LBS - INVENTORY' },
+              { id: 'ci-calves-lt500', label: 'Calves under 500 pounds',
+                shortDesc: 'CATTLE, CALVES, LT 500 LBS - INVENTORY' }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 2 }
+      },
+      {
+        id: 'cof-monthly',
+        label: 'Cattle on Feed — Monthly',
+        description: 'Monthly report covering feedlots with 1,000+ head capacity. Placements by weight class are especially relevant for feeder demand.',
+        groups: [
+          {
+            name: 'Inventory',
+            items: [
+              { id: 'cof-inventory', label: 'Cattle on Feed — Inventory',
+                shortDesc: 'CATTLE, ON FEED - INVENTORY' }
+            ]
+          },
+          {
+            name: 'Placements',
+            items: [
+              { id: 'cof-placements-total', label: 'Placements — total',
+                shortDesc: 'CATTLE, ON FEED - PLACEMENTS, MEASURED IN HEAD',
+                subItems: [
+                  { id: 'cof-placements-lt600', label: 'Placements — under 600 lbs',
+                    shortDesc: 'CATTLE, ON FEED, LT 600 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, LT 600 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-600-699', label: 'Placements — 600 to 699 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 600-699 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 600-699 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-700-799', label: 'Placements — 700 to 799 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 700-799 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 700-799 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-800-899', label: 'Placements — 800 to 899 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 800-899 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 800-899 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-900-999', label: 'Placements — 900 to 999 lbs',
+                    shortDesc: 'CATTLE, ON FEED, 900-999 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, 900-999 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] },
+                  { id: 'cof-placements-ge1000', label: 'Placements — 1,000 lbs and over',
+                    shortDesc: 'CATTLE, ON FEED, GE 1,000 LBS - PLACEMENTS, MEASURED IN HEAD',
+                    paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                                  class_desc: 'ON FEED, GE 1,000 LBS',
+                                  statisticcat_desc: 'PLACEMENTS' }] }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Outflow',
+            items: [
+              { id: 'cof-marketings', label: 'Marketings (Sales for Slaughter)',
+                shortDesc: ['CATTLE, ON FEED - SALES, MEASURED IN HEAD',
+                            'CATTLE, ON FEED - SALES FOR SLAUGHTER, MEASURED IN HEAD'],
+                paramSets: [{ commodity_desc: 'CATTLE', prodn_practice_desc: 'ON FEED',
+                              statisticcat_desc: 'SALES FOR SLAUGHTER',
+                              class_desc: 'ALL CLASSES' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 1 }, maxRows: 24
+      }
     ],
     spreads: [
       { id: 'gf-le', label: 'GF–LE · Feeder vs Live', unit: '$/cwt', op: 'subtract',
@@ -243,21 +534,101 @@ export const COMMODITIES_CONFIG = [
     extraContinuous: ['LE', 'ZC', 'ZM'],
     cot: [{ key: 'he', label: 'Lean Hogs (CME)', filterLike: '%LEAN HOGS%' }],
     usda: [
-      { id: 'hp-all', label: 'Quarterly Hogs & Pigs — All Hogs Inventory',
-        shortDesc: ['HOGS - INVENTORY'], params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'hp-breeding', label: 'Quarterly Hogs & Pigs — Kept for Breeding',
-        shortDesc: ['HOGS, BREEDING - INVENTORY'], params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'hp-market', label: 'Quarterly Hogs & Pigs — Market Hogs',
-        shortDesc: ['HOGS, MARKET - INVENTORY'], params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cold-storage-pork', label: 'Cold Storage — Pork',
-        shortDesc: ['PORK, FROZEN - STOCKS, MEASURED IN LB'],
-        paramSets: [{ commodity_desc: 'PORK', statisticcat_desc: 'STOCKS',
-                      util_practice_desc: 'COLD STORAGE, FROZEN', class_desc: 'ALL CLASSES' }],
-        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 },
-      { id: 'cold-storage-bellies', label: 'Cold Storage — Pork Bellies',
-        paramSets: [{ commodity_desc: 'PORK', statisticcat_desc: 'STOCKS',
-                      util_practice_desc: 'COLD STORAGE, FROZEN', class_desc: 'BELLIES' }],
-        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10 }
+      {
+        id: 'hogs-inventory',
+        label: 'Quarterly Hogs & Pigs',
+        description: 'Quarterly inventory report (March, June, September, December). Breaks total inventory into breeding herd and market hogs, with market hogs further split by weight class.',
+        groups: [
+          {
+            name: 'Total & breeding',
+            items: [
+              { id: 'hi-all', label: 'All hogs and pigs',
+                shortDesc: 'HOGS - INVENTORY',
+                paramSets: [{ commodity_desc: 'HOGS', class_desc: 'ALL CLASSES',
+                              statisticcat_desc: 'INVENTORY' }] },
+              { id: 'hi-breeding', label: 'Kept for breeding',
+                shortDesc: 'HOGS, BREEDING - INVENTORY',
+                paramSets: [{ commodity_desc: 'HOGS', class_desc: 'BREEDING',
+                              statisticcat_desc: 'INVENTORY' }] }
+            ]
+          },
+          {
+            name: 'Market hogs by weight',
+            items: [
+              { id: 'hi-market', label: 'Market hogs — total',
+                shortDesc: 'HOGS, MARKET - INVENTORY',
+                paramSets: [{ commodity_desc: 'HOGS', class_desc: 'MARKET',
+                              statisticcat_desc: 'INVENTORY' }],
+                subItems: [
+                  { id: 'hi-market-lt50', label: 'Market hogs — under 50 lbs',
+                    shortDesc: 'HOGS, MARKET, LT 50 LBS - INVENTORY',
+                    paramSets: [{ commodity_desc: 'HOGS', class_desc: 'MARKET, LT 50 LBS',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'hi-market-50-119', label: 'Market hogs — 50 to 119 lbs',
+                    shortDesc: 'HOGS, MARKET, 50-119 LBS - INVENTORY',
+                    paramSets: [{ commodity_desc: 'HOGS', class_desc: 'MARKET, 50-119 LBS',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'hi-market-120-179', label: 'Market hogs — 120 to 179 lbs',
+                    shortDesc: 'HOGS, MARKET, 120-179 LBS - INVENTORY',
+                    paramSets: [{ commodity_desc: 'HOGS', class_desc: 'MARKET, 120-179 LBS',
+                                  statisticcat_desc: 'INVENTORY' }] },
+                  { id: 'hi-market-ge180', label: 'Market hogs — 180 lbs and over',
+                    shortDesc: 'HOGS, MARKET, GE 180 LBS - INVENTORY',
+                    paramSets: [{ commodity_desc: 'HOGS', class_desc: 'MARKET, GE 180 LBS',
+                                  statisticcat_desc: 'INVENTORY' }] }
+                ]
+              }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 1 }, maxRows: 10
+      },
+      {
+        id: 'pig-crop',
+        label: 'Pig Crop',
+        description: 'Number of pigs saved during the quarter, and derived measures (sows farrowed, pigs per litter).',
+        groups: [
+          {
+            name: 'Crop',
+            items: [
+              { id: 'pig-crop-total', label: 'Pig crop',
+                shortDesc: 'HOGS - PIG CROP, MEASURED IN HEAD',
+                paramSets: [{ commodity_desc: 'HOGS', statisticcat_desc: 'PIG CROP',
+                              unit_desc: 'HEAD' }] },
+              { id: 'sows-farrowed', label: 'Sows farrowed',
+                shortDesc: 'HOGS, BREEDING - SOWS FARROWED, MEASURED IN HEAD',
+                paramSets: [{ commodity_desc: 'HOGS', class_desc: 'BREEDING',
+                              statisticcat_desc: 'SOWS FARROWED', unit_desc: 'HEAD' }] },
+              { id: 'pigs-per-litter', label: 'Pigs per litter',
+                shortDesc: 'HOGS - PIGS PER LITTER, AVG, MEASURED IN PIGS / LITTER',
+                paramSets: [{ commodity_desc: 'HOGS', statisticcat_desc: 'PIGS PER LITTER' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 2 }, maxRows: 12
+      },
+      {
+        id: 'cold-storage-pork',
+        label: 'Cold Storage — Pork',
+        description: 'Monthly stocks of pork and pork bellies in commercial cold storage warehouses.',
+        groups: [
+          {
+            name: 'Frozen stocks',
+            items: [
+              { id: 'cs-pork-total', label: 'Pork — total frozen',
+                shortDesc: 'PORK, FROZEN - STOCKS, MEASURED IN LB',
+                paramSets: [{ commodity_desc: 'PORK', statisticcat_desc: 'STOCKS',
+                              util_practice_desc: 'COLD STORAGE, FROZEN',
+                              class_desc: 'ALL CLASSES' }] },
+              { id: 'cs-pork-bellies', label: 'Pork bellies — frozen',
+                paramSets: [{ commodity_desc: 'PORK', statisticcat_desc: 'STOCKS',
+                              util_practice_desc: 'COLD STORAGE, FROZEN',
+                              class_desc: 'BELLIES' }] }
+            ]
+          }
+        ],
+        params: { year__GE: THIS_YEAR - 1 }, maxRows: 12
+      }
     ],
     spreads: [
       { id: 'hem-hez', label: 'HEM–HEZ · Jun vs Dic', unit: '¢/lb', op: 'subtract',
